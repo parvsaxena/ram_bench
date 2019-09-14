@@ -11,7 +11,7 @@ typedef uint64_t Int;
 typedef struct Node Node;
 
 struct Node {
-	Int payload; // ignored; just for plausability.
+	Int payload; // To make the node dirty
 	Node* next;
 };
 
@@ -62,6 +62,7 @@ double bench(Int N, Int iters) {
 		// Run through all the nodes:
 		Node* node = start_node;
 		while (node) {
+			node->payload = 300;
 			node = node->next;
 		}
 	}
@@ -78,6 +79,9 @@ int main(int argc, const char * argv[])
 	// Outputs data in gnuplot friendly .data format
 	printf("#bytes    ns/elem\n");
 
+	long long unsigned GB = 1024*1024*1024;
+	long long unsigned int RAM_SIZE = GB*4;
+	//printf("The max memory to be used is %llu", RAM_SIZE);
 	Int stopsPerFactor = 4; // For every power of 2, how many measurements do we do?
 	Int minElemensFactor = 6;  // First measurement is 2^this number of elements.
 	Int maxElemsFactor = 30; // Last measurement is 2^this number of elements. 30 == 16GB of memory
@@ -91,6 +95,9 @@ int main(int argc, const char * argv[])
 		//Int reps = elemsPerMeasure / N;
 		Int reps = (Int)floor(1e9 / pow(N, 1.5) + 0.5);
 		if (reps<1) reps = 1;
+		if (N >= RAM_SIZE/ sizeof(Node)) {
+			continue;
+		}	
 		double ans = bench(N, reps);
 		printf("%llu   %f   # (N=%llu, reps=%llu) %llu/%llu\n", N*sizeof(Node), ans, N, reps, ei-min+1, max-min+1);
 	}
