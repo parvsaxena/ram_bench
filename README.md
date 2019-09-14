@@ -3,12 +3,17 @@ RAM Bench
 
 A benchmark for random memory accesses, with the aim to prove that there is no such thing as `O(1)` memory accesses on modern hardware, but rather that it is `O(√N)`.
 
-IMPORTANT FILES
+Important Files
 ===============
-list_traversal.c                  - Program to calculate random write for RAM 
+
+list_traversal.c                  - Program to calculate random write for RAM
+
 list_traversal_RAM_data.txt       - Results of random write for RAM
+
 list_traversal_pmem_reattempted.c - Program to calculate random write for RAM
+
 list_traversal_PMEM_data.txt      - Results of random write for PMEM
+
 Usage
 -----
 
