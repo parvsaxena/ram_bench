@@ -11,8 +11,6 @@ typedef uint64_t Int;
 
 typedef struct Node Node;
 
-#define pmem_size 1024*1024*1024
-
 PMEMobjpool *pm_pool;
 
 
@@ -77,20 +75,20 @@ double bench(Int N, Int iters) {
         free(nodes); // Free up unused memory before meassuring:
         // Do the actual measurements:
         Int start = clock();
-        TX_BEGIN(pm_pool) {
+//        TX_BEGIN(pm_pool) {
 
-            pmemobj_tx_add_range_direct(memory, sizeof(N* sizeof(Node)));
+//            pmemobj_tx_add_range_direct(memory, sizeof(N* sizeof(Node)));
             for (Int it = 0; it < iters; ++it) {
                 // Run through all the nodes:
                 Node *node = start_node;
                 while (node) {
                     node->payload = 300;
-                    // pmemobj_persist(pm_pool, node, sizeof(Node));
+                    pmemobj_persist(pm_pool, node, sizeof(Node));
 
                     node = node->next;
                 }
             }
-        } TX_END
+//        } TX_END
 
         Int dur = clock() - start;
         ns = 1e9 * dur / CLOCKS_PER_SEC;
@@ -107,7 +105,8 @@ int main(int argc, const char * argv[])
 {
     // Outputs data in gnuplot friendly .data format
     printf("#bytes    ns/elem\n");
-
+    long long int GB = 1024*1024*1024;
+    long long int pmem_size = GB*4;
     Int stopsPerFactor = 4; // For every power of 2, how many measurements do we do?
     Int minElemensFactor = 6;  // First measurement is 2^this number of elements.
     Int maxElemsFactor = 30; // Last measurement is 2^this number of elements. 30 == 16GB of memory
