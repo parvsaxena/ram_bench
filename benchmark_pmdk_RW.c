@@ -15,7 +15,7 @@ PMEMobjpool *pm_pool;
 
 
 struct Node {
-    Int payload; // ignored; just for plausability.
+    Int payload;
     Int payload1;
     Int payload2;
     Int payload3;
@@ -75,25 +75,29 @@ double bench(Int N, Int iters) {
 
 //            pmemobj_tx_add_range_direct(memory, sizeof(N* sizeof(Node)));
             for (Int it = 0; it < iters; ++it) {
-                // Run through all the nodes:
+                // Run through all the nodes:		
                 Node *node = start_node;
                 while (node) {
-                    arr[0] = node->payload;
-                    arr[1] = node->payload1;
-                    arr[2] = node->payload2;
-                    arr[3] = node->payload3;
-                    arr[4] = node->payload4;
-                    arr[5] = node->payload5;
-                    arr[6] = node->payload6;
-//                    node->payload = 300;
-//                    node->payload1 = 300;
-//                    node->payload2 = 300;
-//                    node->payload3 = 300;
-//                    node->payload4 = 300;
-//                    node->payload5 = 300;
-//                    node->payload6 = 300;
+		    TX_BEGIN(pm_pool) {
+		    pmemobj_tx_add_range_direct(node, sizeof(sizeof(Node)));
+//                    arr[0] = node->payload;
+//                    arr[1] = node->payload1;
+//                    arr[2] = node->payload2;
+//                    arr[3] = node->payload3;
+//                    arr[4] = node->payload4;
+//                    arr[5] = node->payload5;
+//                    arr[6] = node->payload6;
+                    node->payload = 300;
+                    node->payload1 = 300;
+                    node->payload2 = 300;
+                    node->payload3 = 300;
+                    node->payload4 = 300;
+                    node->payload5 = 300;
+                    node->payload6 = 300;
                     node = node->next;
-                }
+		    }TX_END
+		}
+		
             }
 //        } TX_END
 
@@ -139,6 +143,7 @@ int main(int argc, const char * argv[])
         if (N >= pmem_size/ sizeof(Node)) {
             continue;
         }
+	reps=1;
         double ans = bench(N, reps);
         printf("%llu   %f   # (N=%llu, reps=%llu) %llu/%llu\n", N*sizeof(Node), ans, N, reps, ei-min+1, max-min+1);
 
