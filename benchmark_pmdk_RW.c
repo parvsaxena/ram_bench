@@ -71,35 +71,26 @@ double bench(Int N, Int iters) {
         free(nodes); // Free up unused memory before meassuring:
         // Do the actual measurements:
         Int start = clock();
-//        TX_BEGIN(pm_pool) {
-
-//            pmemobj_tx_add_range_direct(memory, sizeof(N* sizeof(Node)));
             for (Int it = 0; it < iters; ++it) {
                 // Run through all the nodes:		
                 Node *node = start_node;
                 while (node) {
-		    TX_BEGIN(pm_pool) {
-		    pmemobj_tx_add_range_direct(node, sizeof(sizeof(Node)));
-//                    arr[0] = node->payload;
-//                    arr[1] = node->payload1;
-//                    arr[2] = node->payload2;
-//                    arr[3] = node->payload3;
-//                    arr[4] = node->payload4;
-//                    arr[5] = node->payload5;
-//                    arr[6] = node->payload6;
-                    node->payload = 300;
-                    node->payload1 = 300;
-                    node->payload2 = 300;
-                    node->payload3 = 300;
-                    node->payload4 = 300;
-                    node->payload5 = 300;
-                    node->payload6 = 300;
-                    node = node->next;
-		    }TX_END
-		}
-		
+                    TX_BEGIN(pm_pool) {
+                        pmemobj_tx_add_range_direct(node, sizeof(Node));
+                        node->payload = 300;
+                        node->payload1 = 300;
+                        node->payload2 = 300;
+                        node->payload3 = 300;
+                        node->payload4 = 300;
+                        node->payload5 = 300;
+                        node->payload6 = 300;
+                        // pmem_persist(node, sizeof(Node));
+                        node = node->next;
+
+
+                    }TX_END
+		        }
             }
-//        } TX_END
 
         Int dur = clock() - start;
         ns = 1e9 * dur / CLOCKS_PER_SEC;
@@ -133,7 +124,7 @@ int main(int argc, const char * argv[])
         exit(-1);
     }
 
-    for (Int ei=min; ei<=max; ++ei) {
+/*    for (Int ei=min; ei<=max; ++ei) {
         Int N = (Int)floor(pow(2.0, (double)ei / stopsPerFactor) + 0.5);
         //Int reps = elemsPerMeasure / N;
         Int reps = (Int)floor(1e9 / pow(N, 1.5) + 0.5);
@@ -150,5 +141,12 @@ int main(int argc, const char * argv[])
         /////// Remove
         // return 1;
         ///////
-    }
+    }*/
+    Int N = 1000;
+
+    double ans;
+
+    ans = bench(N, 1);
+
+    printf("The average latency for %lu bytes and %lu elements is %f\n", sizeof(Node), N, ans);
 }

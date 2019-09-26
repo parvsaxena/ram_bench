@@ -33,7 +33,7 @@ void random_shuffle(Node** list, Int N)
     }
 }
 
-double benchmark_pmemobj_tx_zalloc(Int N, Int iters) {
+double benchmark_pmemobj_tx_zalloc(Int N) {
 
     PMEMoid oid;
     double ns;
@@ -49,10 +49,10 @@ double benchmark_pmemobj_tx_zalloc(Int N, Int iters) {
     Int dur = clock() - start;
     ns = 1e9 * dur / CLOCKS_PER_SEC;
 
-    return ns / (N * iters);
+    return ns / N;
 }
 
-double benchmark_pmemobj_zalloc(Int N, Int iters) {
+double benchmark_pmemobj_zalloc(Int N) {
     PMEMoid oid;
     double ns;
 
@@ -64,10 +64,10 @@ double benchmark_pmemobj_zalloc(Int N, Int iters) {
     Int dur = clock() - start;
     ns = 1e9 * dur / CLOCKS_PER_SEC;
 
-    return ns / (N * iters);
+    return ns / N;
 }
 
-double benchmark_empty_transaction(Int N, Int iters) {
+double benchmark_empty_transaction(Int N) {
 
     PMEMoid oid;
     double ns;
@@ -84,22 +84,23 @@ double benchmark_empty_transaction(Int N, Int iters) {
     Int dur = clock() - start;
     ns = 1e9 * dur / CLOCKS_PER_SEC;
 
-    return ns / (N * iters);
+    return ns / N;
 }
 
 int main() {
-    long long int GB = 1024*1024*16;
+    long long int GB = 1024*1024*1024;
     long long int pmem_size = GB*1;
     long long int N;
     pm_pool = pmemobj_create("/mnt/mem/a.pm", "store.db", pmem_size+20, 0666);
-    N = pmem_size/ sizeof(Node);
+    // N = pmem_size/ sizeof(Node);
+    N = 1000;
     double ans;
 
-    ans = benchmark_empty_transaction(N, 1);
+    ans = benchmark_empty_transaction(N);
 
-    // ans = benchmark_pmemobj_tx_zalloc(N, 1);
+    // ans = benchmark_pmemobj_tx_zalloc(N);
 
-    // ans = benchmark_pmemobj_zalloc(N, 1);
+    // ans = benchmark_pmemobj_zalloc(N);
 
-    printf("The average latency for %lu bytes and %lu elements is %f\n", sizeof(Node), N, ans);
+    printf("The average latency for %lu bytes and %lld elements is %f\n", sizeof(Node), N, ans);
 }
